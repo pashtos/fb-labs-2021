@@ -1,3 +1,4 @@
+import math
 import operations as o
 
 path1 = "D:\\Desktop\\учёба\\крипта\\fb-labs-2021\\tasks\\crypto_cp_3\\for_test.utf8\\V9"
@@ -90,7 +91,7 @@ def decrypter(cipher):
     possible_texts = []
     decrypted_txt = ""
     for pair in candidates:
-        for i in range(0, 51, 2):
+        for i in range(0, len(cipher), 2):
             a_reversed = o.obernenyi(pair[0], 31 ** 2)
             if a_reversed == -1:
                 continue
@@ -99,9 +100,35 @@ def decrypter(cipher):
             x1 = x_ // 31
             x2 = x_ % 31
             decrypted_txt += alphabet_[x1] + alphabet_[x2]
-        possible_texts.append(f"key = ({pair[0]}, {pair[1]}):\t{decrypted_txt}")
+        possible_texts.append(decrypted_txt)
         decrypted_txt = ""
     return possible_texts
+
+
+def count_frequency(text):
+    length = len(text)
+    frequency = [text.count(i) / length for i in alphabet_]
+    return frequency
+
+
+def entropy(text):
+    frequency_arr = count_frequency(text)
+    h = 0
+    for p in frequency_arr:
+        if p > 0:
+            h += p * math.log(p, 2)
+    return round(-h, 5)
+
+
+def recognizer(possible_texts):
+    possible_answers = []
+    answer = ""
+    for variant in possible_texts:
+        possible_answers.append([variant[:50], entropy(variant)])
+        if entropy(variant) < 4.5:
+            answer = f"Answer is found! {variant[:50]}"
+    print(answer)
+    return possible_answers
 
 
 text_ = filter_text(path2)
@@ -110,10 +137,10 @@ text_ = filter_text(path2)
 # [print(f"{key}:\t{bo5_cipher[key]}") for key in bo5_cipher]
 # keys = find_keys(text_)
 # [print(f"({key[0]}, {key[1]})", end='\t') for key in keys]
-print(*decrypter(text_), sep='\n')
 # txt = decrypter(text_)[0].replace('ь', '_')
 # txt = txt.replace('ы', 'ь')
 # txt = txt.replace('_', 'ы')
 # print(txt)
-
+entropies = recognizer(decrypter(text_))
+[print(f"Entropy: {i[1]}\tfor text: {i[0]}") for i in entropies]
 
